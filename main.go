@@ -2,11 +2,14 @@ package main
 
 import "fmt"
 import "net/http"
+import "html/template"
 import fs "ascii-art-web/fs"
 
 var not_found = "404 not found"
 var not_allowed = "method not allowed"
-var max_lenght = 250 
+var internal_error = "internal server error, check your imput"
+var exeeded = "the input exeeded the maximul allowed, try again"
+var max_allowed int64 = 1000 
 
 
 /*making a HandleFunc with a multiplexer*/
@@ -31,14 +34,43 @@ func singlePage(w http.ResponseWriter, r *http.Request){
 		fmt.Fprintln(w , not_found)
 		return
 	}
+	len := r.ContentLength
+	if len > max_allowed {
+				
+		t , err := template.ParseFiles("templates/index.html")
+		if err != nil {
+			t.Execute(w, internal_error)
+		}
+		t.Execute(w, exeeded)
+		
+		return
+	}
 	if r.Method == "GET"{
+		t , err := template.ParseFiles("templates/index.html")
+		if err != nil {
+			// internal server error 
+			fmt.Fprintln(w, internal_error)
+			return
+		}
+		t.Execute(w, "")
 		// return home page  
-		fmt.Fprintln(w, "the method used is get")
 	}else if r.Method == "POST"{
+		r.ParseForm()
+		text := r.FormValue("text")
+		banner := r.FormValue("banner")
+		Ascii, err := fs.Ascii_Art(text ,banner )
+		t, err := template.ParseFiles("templates/index.html")
+		if err != nil {
+			t.Execute(w, internal_error)
+			return
+		}
+		t.Execute(w,Ascii)
 		// return the template
-		fmt.Fprintln(w ,"the method is post")
-		test := fs.Ascii_Art("test", "shadow")
-		fmt.Fprintln(w, test)
+		if err != nil {
+			fmt.Fprintln(w, internal_error)
+			fmt.Println(err)
+			return
+		}
 	}else{
 		w.WriteHeader(405)
 		fmt.Fprintln(w , not_allowed)

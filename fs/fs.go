@@ -2,21 +2,38 @@ package fspackage
 
 import (
 	"bufio"
+	"errors"
 	"log"
 	"os"
 	"strings"
 )
 
-func Ascii_Art(text, banner string) string {
-	chars_indexes := getIndexes(text)
+var empty_text = "bad input, try again"
+
+
+func Ascii_Art(text, banner string) (string, error) {
+	if banner == "" {
+		banner = "standard"
+	}
+	if text == "" {
+		return empty_text , nil
+	}
+	chars_indexes, err := getIndexes(text)
+	if err != nil {
+		return "", err
+	}
+
 	path_name := "static/" + banner + ".txt"
-	chars_map := GetCharacters(chars_indexes, path_name)
+	chars_map, err := GetCharacters(chars_indexes, path_name)
+	if err != nil {
+		return "", err
+	}
 	text = strings.TrimSpace(text)
 	words := strings.Split(text, "\n")
 	// this variable check if there is a newline at the end of the argument
-	return Writer(words, chars_map)
+	return Writer(words, chars_map), nil
 }
-func getIndexes(text string) map[int]rune {
+func getIndexes(text string) (map[int]rune, error) {
 	index_map := make(map[int]rune, len(text))
 	/* this loop returns the  starting  line  of each character at the ascii art file */
 	for _, char := range text {
@@ -25,9 +42,12 @@ func getIndexes(text string) map[int]rune {
 		}
 		index_map[((int(char)-31)*9 - 7)] = char
 	}
-	return index_map
+	if len(index_map) == 0 {
+		return index_map, errors.New("no valid character")
+	}
+	return index_map, nil
 }
-func GetCharacters(index_map map[int]rune, banner string) map[rune][]string {
+func GetCharacters(index_map map[int]rune, banner string) (map[rune][]string, error) {
 	// Open file,  intialize a bufio scanner along side some variables
 	var (
 		file       = openfile(banner)
@@ -53,12 +73,7 @@ func GetCharacters(index_map map[int]rune, banner string) map[rune][]string {
 		}
 		line_num++
 	}
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal("Error reading the file")
-	}
-
-	return chars_map
+	return chars_map, scanner.Err()
 }
 
 func Writer(words []string, chars_map map[rune][]string) string {
