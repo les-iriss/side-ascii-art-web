@@ -1,32 +1,25 @@
-#ASCII-ART-WEB
-##Description
+# ASCII-ART-WEB 
 
-ascii-art-web is a web application that creates and runs a server, allowing users to interact with a web GUI version of terminal-based ASCII art.
-Authors
+## Description 
+ascii-art-web is a web application consists in creating and running a server, in which it will be possible to user a web GUI version of terminal base ascii-art
 
-    Oussama Benali
-    Ziad ...
-    Hamza ...
+## Authors
+    - Oussama Benali
+    - Ziad ...
+    - Hamza ...
 
-##Usage
+## Usage
+    to start the server you need to run the bash command 
+    ```bash
+        go run main.go
+    ```
+    and then fire the browser on http://localhost on port 8080
+    ```URL 
+        http://localhost:8080
 
-To start the server, run the following bash command:
-
-```bash
-
-go run main.go
-```
-Then, open your browser and navigate to:
-
-```URL
-
-http://localhost:8080
-```
-##Implementation Details
-
-The project code is divided into the main package and two additional packages:
-
-    funcs: Contains the server handlers and functions.
-    fs: Contains the code that generates the ASCII art.
-
-HTML files are placed in the templates directory, while the banners are in the static directory.
+## Implementation details
+    the projects code is devided into the main package and two other packages, 
+    the package funcs that has the server handlers and function
+    and the package fs where the code that generates the ascii art is 
+    html files are placed in the templates derectory while the banners are in the static derectory 
+    
