@@ -10,13 +10,18 @@ import (
 
 var empty_text = "bad input, try again"
 
+var banners = map[string]bool{
+	"standard":   true,
+	"shadow":     true,
+	"thinkertoy": true,
+}
 
 func Ascii_Art(text, banner string) (string, error) {
-	if banner == "" {
-		banner = "standard"
+	if !banners[banner] {
+		return "", errors.New("wrong banner")
 	}
 	if text == "" {
-		return empty_text , nil
+		return empty_text, errors.New(empty_text)
 	}
 	chars_indexes, err := getIndexes(text)
 	if err != nil {
