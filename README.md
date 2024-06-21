@@ -11,10 +11,10 @@ ascii-art-web is a web application consists in creating and running a server, in
 ## Usage
     to start the server you need to run the bash command 
     
-    ```bash
         go run main.go
-    ```
+
     and then fire the browser on http://localhost on port 8080
+
         http://localhost:8080
 
 ## Implementation details
