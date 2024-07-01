@@ -47,9 +47,6 @@ func getIndexes(text string) (map[int]rune, error) {
 		}
 		index_map[((int(char)-31)*9 - 7)] = char
 	}
-	if len(index_map) == 0 {
-		return index_map, errors.New("no valid character")
-	}
 	return index_map, nil
 }
 func GetCharacters(index_map map[int]rune, banner string) (map[rune][]string, error) {
