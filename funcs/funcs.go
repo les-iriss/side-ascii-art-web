@@ -13,7 +13,7 @@ var (
 	not_allowed          = "405 Method Not Allowed"
 	internal_error       = "500 Internal Server Error, error check your imput"
 	exeeded              = "413 input exeeded the maximum allowed, try again"
-	max_allowed    int64 = 1000
+	max_allowed    int64 = 50000
 )
 
 /*making a HandleFunc with a multiplexer*/
