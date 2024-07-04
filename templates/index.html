@@ -6,7 +6,9 @@
 <body>
     <h1>Display ASCII Art</h1>
     <form action="/ascii-art" method="post">
-        <label for="text">Text:</label>
+		<fieldset>
+			<legend>ASCII-ART FORM</legend>
+        <label for="text">Enter a Text:</label>
         <br>
         <textarea id="text" name="text" rows="4" cols="50" required></textarea>
         <br>
@@ -18,7 +20,10 @@
         </select>
         <br>
         <button type="submit">Generate</button>
+		<fieldset>
+				<legend>RESULT:</legend>
        <pre>{{.}}</pre> 
+		</fieldset>
     </form>
 </body>
 </html>
