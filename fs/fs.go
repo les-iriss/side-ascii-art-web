@@ -8,36 +8,41 @@ import (
 	"strings"
 )
 
-var empty_text = "bad input, try again"
-
 var banners = map[string]bool{
 	"standard":   true,
 	"shadow":     true,
 	"thinkertoy": true,
 }
 
-func Ascii_Art(text, banner string) (string, error) {
+var (
+	bad_request           = "status 400 - Bad Request"
+	internal_server_error = "500 - Internal Server Errors"
+)
+
+func Ascii_Art(text, banner string) (string, int, error) {
 	if !banners[banner] {
-		return "", errors.New("wrong banner")
+		return "", 400, errors.New(bad_request)
 	}
 	if text == "" {
-		return empty_text, errors.New(empty_text)
+		return "", 200, nil
 	}
+
 	chars_indexes, err := getIndexes(text)
 	if err != nil {
-		return "", err
+		return "", 500, errors.New(internal_server_error)
 	}
 
 	path_name := "static/" + banner + ".txt"
 	chars_map, err := GetCharacters(chars_indexes, path_name)
 	if err != nil {
-		return "", err
+		return "", 500, errors.New(internal_server_error)
 	}
 	text = strings.TrimSpace(text)
 	words := strings.Split(text, "\n")
 	// this variable check if there is a newline at the end of the argument
-	return Writer(words, chars_map), nil
+	return Writer(words, chars_map), 200, nil
 }
+
 func getIndexes(text string) (map[int]rune, error) {
 	index_map := make(map[int]rune, len(text))
 	/* this loop returns the  starting  line  of each character at the ascii art file */
@@ -49,6 +54,7 @@ func getIndexes(text string) (map[int]rune, error) {
 	}
 	return index_map, nil
 }
+
 func GetCharacters(index_map map[int]rune, banner string) (map[rune][]string, error) {
 	// Open file,  intialize a bufio scanner along side some variables
 	var (

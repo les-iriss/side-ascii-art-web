@@ -1,10 +1,11 @@
 package funcs
 
 import (
-	fs "ascii-art-web/fs"
 	"fmt"
 	"html/template"
 	"net/http"
+
+	fs "ascii-art-web/fs"
 )
 
 var (
@@ -45,7 +46,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Method != "GET" {
+	if r.Method != http.MethodGet {
 		w.WriteHeader(405)
 		w.Write([]byte(not_allowed))
 		return
@@ -53,6 +54,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("templates/index.html")
 	if err != nil {
+		w.WriteHeader(500)
 		// internal server error
 		fmt.Fprintln(w, internal_error)
 		return
@@ -77,15 +79,20 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 		t.Execute(w, exeeded)
 		return
 	}
+	t, err := template.ParseFiles("templates/index.html")
+	if err != nil {
+		w.WriteHeader(500)
+		t.Execute(w, internal_error)
+		return
+	}
 	// parse the form into a map and get the needed value
 	r.ParseForm()
 	text := r.FormValue("text")
 	banner := r.FormValue("banner")
-	Ascii, err1 := fs.Ascii_Art(text, banner)
-	t, err2 := template.ParseFiles("templates/index.html")
-	if err1 != nil || err2 != nil {
-		t.Execute(w, internal_error)
-		return
+	Ascii, status, err := fs.Ascii_Art(text, banner)
+	if err != nil {
+		w.WriteHeader(status)
+		t.Execute(w, err)
 	}
 	t.Execute(w, Ascii)
 }
