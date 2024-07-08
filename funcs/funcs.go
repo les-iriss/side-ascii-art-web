@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-
 	fs "ascii-art-web/fs"
 )
 
@@ -15,6 +14,11 @@ var (
 	internal_error       = "500 Internal Server Error, error check your imput"
 	exeeded              = "413 input exeeded the maximum allowed, try again"
 	max_allowed    int64 = 50000
+	Data 		     = struct{
+		Ascii string
+		Shown bool
+		Err string
+	}{}
 )
 
 /*making a HandleFunc with a multiplexer*/
@@ -39,6 +43,9 @@ func HandleFunc(path string, f func(http.ResponseWriter, *http.Request)) {
 
 /* making functions to hanlde requests */
 func Home(w http.ResponseWriter, r *http.Request) {
+	Data.Err = ""
+	Data.Shown = false
+	Data.Ascii = ""
 	// checking the integrety of the url
 	if r.URL.Path != "/" {
 		w.WriteHeader(404)
@@ -59,10 +66,13 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, internal_error)
 		return
 	}
-	t.Execute(w, "")
+	t.Execute(w, Data)
 }
 
 func Ascii_Art(w http.ResponseWriter, r *http.Request) {
+	Data.Err = ""
+	Data.Ascii = ""
+	Data.Shown = false
 	if r.Method != http.MethodPost {
 		w.WriteHeader(405)
 		w.Write([]byte(not_allowed))
@@ -71,12 +81,14 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 	// checking request length
 	Len := r.ContentLength
 	if Len > max_allowed {
+		Data.Err = exeeded
 		w.WriteHeader(413)
 		t, err := template.ParseFiles(template_path)
 		if err != nil {
-			t.Execute(w, internal_error)
+			Data.Err = internal_error
+			t.Execute(w, Data)
 		}
-		t.Execute(w, exeeded)
+		t.Execute(w, Data)
 		return
 	}
 	t, err := template.ParseFiles("templates/index.html")
@@ -89,10 +101,24 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	text := r.FormValue("text")
 	banner := r.FormValue("banner")
-	Ascii, status, err := fs.Ascii_Art(text, banner)
+	var status int
+	Data.Ascii, status, err = fs.Ascii_Art(text, banner)
+	Data.Shown = true
 	if err != nil {
+		Data.Err = internal_error
 		w.WriteHeader(status)
-		t.Execute(w, err)
+		t.Execute(w, Data)
 	}
-	t.Execute(w, Ascii)
+	t.Execute(w, Data)
+}
+
+func Download(w http.ResponseWriter, r *http.Request){
+	if r.Method != http.MethodGet{
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write([]byte("method not allowed"))
+		return
+	}
+	w.Header().Set("Content-Disposition", "attachment; filename=ascii-art.txt")
+     	w.Header().Set("Content-Type", "text/plain")
+	w.Write([]byte(Data.Ascii))
 }

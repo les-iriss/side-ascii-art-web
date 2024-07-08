@@ -17,6 +17,7 @@ func main() {
 	// handle everything at single page
 	funcs.HandleFunc("/", funcs.Home)
 	funcs.HandleFunc("/ascii-art", funcs.Ascii_Art)
+	funcs.HandleFunc("/download", funcs.Download)
 	fmt.Println("server has been launched at localhost:8080")
 	fmt.Println("http://localhost:8080")
 	server.ListenAndServe()
