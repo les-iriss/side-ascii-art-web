@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	fs "ascii-art-web/fs"
+	"os"
 )
 
 var (
@@ -118,7 +119,21 @@ func Download(w http.ResponseWriter, r *http.Request){
 		w.Write([]byte("method not allowed"))
 		return
 	}
+	referer := r.Header.Get("Referer")
+	if referer != "http://localhost:8080/ascii-art" {
+       	 http.Error(w, "Forbidden", http.StatusForbidden)
+        return
+	}
+	// creat the file first 
+	filename := "ascii-art.txt"
+	err := os.WriteFile(filename, []byte(Data.Ascii), 0644)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	return
+	}
+	
 	w.Header().Set("Content-Disposition", "attachment; filename=ascii-art.txt")
      	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte(Data.Ascii))
+	http.ServeFile(w, r ,filename)
+	os.Remove(filename)
 }
