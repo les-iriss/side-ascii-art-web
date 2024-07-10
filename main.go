@@ -14,6 +14,7 @@ func main() {
 		Addr:    "127.0.0.1:8080",
 		Handler: funcs.Mux,
 	}
+
 	// handle everything at single page
 	funcs.HandleFunc("/", funcs.Home)
 	funcs.HandleFunc("/ascii-art", funcs.Ascii_Art)

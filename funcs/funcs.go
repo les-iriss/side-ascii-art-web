@@ -1,7 +1,6 @@
 package funcs
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 
@@ -13,13 +12,22 @@ var (
 	not_found            = "404 not found"
 	not_allowed          = "405 Method Not Allowed"
 	internal_error       = "500 Internal Server Error, error check your imput"
-	exeeded              = "413 input exeeded the maximum allowed, try again"
+	exeeded              = "input exeeded the maximum allowed, try again"
 	max_allowed    int64 = 50000
 	Ascii                = ""
 	Data                 = struct {
 		Ascii string
 		Err   string
 	}{}
+	Input = struct {
+		Text   string
+		Banner string
+		Status int
+		Err    error
+	}{
+		Status: 200,
+		Err:    nil,
+	}
 )
 
 /*making a HandleFunc with a multiplexer*/
@@ -37,72 +45,60 @@ func (W *Wrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // making a HandleFunc to wrap functions into handlers
 func HandleFunc(path string, f func(http.ResponseWriter, *http.Request)) {
-	wrapper := Wrapper{}
+	wrapper := &Wrapper{} // instence of Wrapper
 	wrapper.F = f
-	Mux.Handle(path, &wrapper)
+	Mux.Handle(path, wrapper)
 }
 
 /* making functions to hanlde requests */
 func Home(w http.ResponseWriter, r *http.Request) {
 	// checking the integrety of the url
 	if r.URL.Path != "/" {
-		w.WriteHeader(404)
-		w.Write([]byte(not_found))
+		ErrorFunc(w, http.StatusNotFound)
 		return
 	}
 
 	if r.Method != http.MethodGet {
-		w.WriteHeader(405)
-		w.Write([]byte(not_allowed))
-		return
+		ErrorFunc(w, http.StatusMethodNotAllowed)
 	}
 
 	t, err := template.ParseFiles("templates/index.html")
 	if err != nil {
-		w.WriteHeader(500)
-		// internal server error
-		Data.Err = internal_error
-		fmt.Fprintln(w, Data)
+		ErrorFunc(w, http.StatusInternalServerError)
 		return
 	}
 	t.Execute(w, Data)
+	Data.Err = ""
+	Data.Ascii = ""
 }
 
 func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		w.WriteHeader(405)
-		w.Write([]byte(not_allowed))
+		ErrorFunc(w, http.StatusMethodNotAllowed)
 		return
 	}
 	// checking request length
 	Len := r.ContentLength
 	if Len > max_allowed {
-		w.WriteHeader(413)
+		w.WriteHeader(http.StatusRequestEntityTooLarge)
 		t, err := template.ParseFiles(template_path)
 		if err != nil {
 			Data.Err = internal_error
 			t.Execute(w, Data)
 		}
 		Data.Err = exeeded
+		Data.Ascii = ""
 		t.Execute(w, Data)
 		return
 	}
-	t, err := template.ParseFiles("templates/index.html")
-	if err != nil {
-		w.WriteHeader(500)
-		Data.Err = internal_error
-		t.Execute(w, Data)
-		return
-	}
+
 	// parse the form into a map and get the needed value
 	r.ParseForm()
-	text := r.FormValue("text")
-	banner := r.FormValue("banner")
-	status := 200
-	Ascii, status, err = fs.Ascii_Art(text, banner)
-	if err != nil {
-		w.WriteHeader(status)
-		w.Write([]byte("bad request"))
+	Input.Text = r.FormValue("text")
+	Input.Banner = r.FormValue("banner")
+	Data.Ascii, Input.Status, Input.Err = fs.Ascii_Art(Input.Text, Input.Banner)
+	if Input.Err != nil && Input.Status != 200 {
+		ErrorFunc(w, Input.Status)
 		return
 	}
 	http.Redirect(w, r, "/", 303)
