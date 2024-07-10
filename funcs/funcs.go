@@ -92,7 +92,8 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 	Ascii, status, err := fs.Ascii_Art(text, banner)
 	if err != nil {
 		w.WriteHeader(status)
-		t.Execute(w, err)
+		w.Write([]byte("bad request"))
+		return
 	}
 	t.Execute(w, Ascii)
 }
