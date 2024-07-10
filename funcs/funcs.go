@@ -9,16 +9,16 @@ import (
 
 var (
 	template_path        = "templates/index.html"
-	not_found            = "404 not found"
-	not_allowed          = "405 Method Not Allowed"
-	internal_error       = "500 Internal Server Error, error check your imput"
 	exeeded              = "input exeeded the maximum allowed, try again"
 	max_allowed    int64 = 50000
-	Ascii                = ""
+	// Data is related to what is shown on the home page
 	Data                 = struct {
 		Ascii string
 		Err   string
 	}{}
+	// Input is related to fs function, that is responsible for generating the ascii
+	// so these variable are eather sent to that func or recieved from it.
+	// the Status and Err are shown on the error page
 	Input = struct {
 		Text   string
 		Banner string
@@ -83,8 +83,8 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusRequestEntityTooLarge)
 		t, err := template.ParseFiles(template_path)
 		if err != nil {
-			Data.Err = internal_error
-			t.Execute(w, Data)
+			ErrorFunc(w, 500)
+			return
 		}
 		Data.Err = exeeded
 		Data.Ascii = ""
