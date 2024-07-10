@@ -15,6 +15,11 @@ var (
 	internal_error       = "500 Internal Server Error, error check your imput"
 	exeeded              = "413 input exeeded the maximum allowed, try again"
 	max_allowed    int64 = 50000
+	Ascii                = ""
+	Data                 = struct {
+		Ascii string
+		Err   string
+	}{}
 )
 
 /*making a HandleFunc with a multiplexer*/
@@ -56,10 +61,11 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(500)
 		// internal server error
-		fmt.Fprintln(w, internal_error)
+		Data.Err = internal_error
+		fmt.Fprintln(w, Data)
 		return
 	}
-	t.Execute(w, "")
+	t.Execute(w, Data)
 }
 
 func Ascii_Art(w http.ResponseWriter, r *http.Request) {
@@ -74,26 +80,30 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(413)
 		t, err := template.ParseFiles(template_path)
 		if err != nil {
-			t.Execute(w, internal_error)
+			Data.Err = internal_error
+			t.Execute(w, Data)
 		}
-		t.Execute(w, exeeded)
+		Data.Err = exeeded
+		t.Execute(w, Data)
 		return
 	}
 	t, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		w.WriteHeader(500)
-		t.Execute(w, internal_error)
+		Data.Err = internal_error
+		t.Execute(w, Data)
 		return
 	}
 	// parse the form into a map and get the needed value
 	r.ParseForm()
 	text := r.FormValue("text")
 	banner := r.FormValue("banner")
-	Ascii, status, err := fs.Ascii_Art(text, banner)
+	status := 200
+	Ascii, status, err = fs.Ascii_Art(text, banner)
 	if err != nil {
 		w.WriteHeader(status)
 		w.Write([]byte("bad request"))
 		return
 	}
-	t.Execute(w, Ascii)
+	http.Redirect(w, r, "/", 303)
 }
