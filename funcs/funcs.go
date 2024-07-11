@@ -5,14 +5,17 @@ import (
 	"net/http"
 
 	fs "ascii-art-web/fs"
+	"path/filepath"
 )
 
+
 var (
-	template_path        = "templates/index.html"
-	exeeded              = "input exeeded the maximum allowed, try again"
-	max_allowed    int64 = 50000
+	Index_path        = filepath.Join("templates","index.html")
+	Error_path        = filepath.Join("templates","error.html")
+	exeeded           = "input exeeded the maximum allowed, try again"
+	max_allowed int64 = 50000
 	// Data is related to what is shown on the home page
-	Data                 = struct {
+	Data = struct {
 		Ascii string
 		Err   string
 	}{}
@@ -62,7 +65,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		ErrorFunc(w, http.StatusMethodNotAllowed)
 	}
 
-	t, err := template.ParseFiles("templates/index.html")
+	t, err := template.ParseFiles(Index_path)
 	if err != nil {
 		ErrorFunc(w, http.StatusInternalServerError)
 		return
@@ -81,7 +84,7 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 	Len := r.ContentLength
 	if Len > max_allowed {
 		w.WriteHeader(http.StatusRequestEntityTooLarge)
-		t, err := template.ParseFiles(template_path)
+		t, err := template.ParseFiles(Index_path)
 		if err != nil {
 			ErrorFunc(w, 500)
 			return

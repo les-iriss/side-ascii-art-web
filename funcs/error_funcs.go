@@ -10,7 +10,7 @@ var Error struct{
 }
 
 func ErrorFunc(w http.ResponseWriter , Status int){
-	E, err := template.ParseFiles("templates/error.html")
+	E, err := template.ParseFiles(Error_path)
 	if err != nil {
 		w.WriteHeader(Status)
 		Error.Title = "Internal Server Error !!!"
