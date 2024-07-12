@@ -9,16 +9,17 @@ var Error struct{
 	Hint string
 }
 
+var E *template.Template
+
+
+func init() {
+    E, err = template.ParseFiles("templates/error.html")
+    if err != nil {
+        panic(err)
+    }
+    // Change back to original directory if needed
+}
 func ErrorFunc(w http.ResponseWriter , Status int){
-	E, err := template.ParseFiles(Error_path)
-	if err != nil {
-		w.WriteHeader(Status)
-		Error.Title = "Internal Server Error !!!"
-		Error.Status = http.StatusInternalServerError
-		Error.Hint = "InternalServerError"
-		E.Execute(w , Error)
-		return
-	}
 	switch Status {
 	case 404 :
 		w.WriteHeader(404)

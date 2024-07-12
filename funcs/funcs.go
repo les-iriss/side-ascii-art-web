@@ -3,11 +3,24 @@ package funcs
 import (
 	"html/template"
 	"net/http"
-
 	fs "ascii-art-web/fs"
 	"path/filepath"
 )
 
+<<<<<<< HEAD
+=======
+var t *template.Template
+
+var err error
+
+func init() {
+    t, err = template.ParseFiles("templates/index.html")
+    if err != nil {
+        panic(err)
+    }
+}
+
+>>>>>>> main
 
 var (
 	Index_path        = filepath.Join("templates","index.html")
@@ -64,18 +77,17 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		ErrorFunc(w, http.StatusMethodNotAllowed)
 	}
-
-	t, err := template.ParseFiles(Index_path)
-	if err != nil {
-		ErrorFunc(w, http.StatusInternalServerError)
-		return
-	}
 	t.Execute(w, Data)
 	Data.Err = ""
 	Data.Ascii = ""
 }
 
 func Ascii_Art(w http.ResponseWriter, r *http.Request) {
+	// this is only for the testing function it is not needed 
+	// for the the server to operate normally.
+	if r.URL.Path != "/ascii-art"{
+		ErrorFunc(w, http.StatusNotFound)
+	}
 	if r.Method != http.MethodPost {
 		ErrorFunc(w, http.StatusMethodNotAllowed)
 		return
@@ -84,14 +96,10 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 	Len := r.ContentLength
 	if Len > max_allowed {
 		w.WriteHeader(http.StatusRequestEntityTooLarge)
-		t, err := template.ParseFiles(Index_path)
-		if err != nil {
-			ErrorFunc(w, 500)
-			return
-		}
 		Data.Err = exeeded
 		Data.Ascii = ""
 		t.Execute(w, Data)
+		Data.Err = ""
 		return
 	}
 
@@ -104,5 +112,5 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 		ErrorFunc(w, Input.Status)
 		return
 	}
-	http.Redirect(w, r, "/", 303)
+	http.Redirect(w, r, "/", http.StatusFound)
 }
