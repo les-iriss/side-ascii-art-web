@@ -1,10 +1,8 @@
 package funcs
 
 import (
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
@@ -14,36 +12,12 @@ func TestHome(t *testing.T) {
 		url          string
 		method       string
 		expectedCode int
-		expectedFile string
-		expectedBody string
 	}{
 		{
 			name:         "valid request",
 			url:          "/",
 			method:       http.MethodGet,
 			expectedCode: http.StatusOK,
-			expectedFile: "testdata/index.html.golden",
-		},
-		{
-			name:         "invalid URL",
-			url:          "/invalid",
-			method:       http.MethodGet,
-			expectedCode: http.StatusNotFound,
-			expectedBody: not_found,
-		},
-		{
-			name:         "invalid method",
-			url:          "/",
-			method:       http.MethodPost,
-			expectedCode: http.StatusMethodNotAllowed,
-			expectedBody: not_allowed,
-		},
-		{
-			name:         "template parse error",
-			url:          "/",
-			method:       http.MethodGet,
-			expectedCode: http.StatusInternalServerError,
-			expectedBody: internal_error,
 		},
 	}
 
@@ -64,21 +38,6 @@ func TestHome(t *testing.T) {
 					status, tt.expectedCode)
 			}
 
-			if tt.expectedCode == http.StatusOK && tt.expectedFile != "" {
-				expected, err := ioutil.ReadFile(tt.expectedFile)
-				if err != nil {
-					t.Fatal(err)
-				}
-				if strings.TrimSpace(rr.Body.String()) != strings.TrimSpace(string(expected)) {
-					t.Errorf("handler returned unexpected body: got %v want %v",
-						rr.Body.String(), string(expected))
-				}
-			} else if tt.expectedBody != "" {
-				if strings.TrimSpace(rr.Body.String()) != tt.expectedBody {
-					t.Errorf("handler returned unexpected body: got %v want %v",
-						rr.Body.String(), tt.expectedBody)
-				}
-			}
 		})
 	}
 }

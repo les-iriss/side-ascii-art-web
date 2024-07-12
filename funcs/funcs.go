@@ -3,16 +3,17 @@ package funcs
 import (
 	"html/template"
 	"net/http"
-	"log"
 	fs "ascii-art-web/fs"
 )
+
 var t *template.Template
+
 var err error
 
 func init() {
     t, err = template.ParseFiles("templates/index.html")
     if err != nil {
-        log.Fatal(err,"\nare you running the server from a childed derectory?")
+        panic(err)
     }
 }
 
@@ -88,6 +89,7 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 		Data.Err = exeeded
 		Data.Ascii = ""
 		t.Execute(w, Data)
+		Data.Err = ""
 		return
 	}
 
