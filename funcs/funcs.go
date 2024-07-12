@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 	fs "ascii-art-web/fs"
+	"path/filepath"
 )
 
 var t *template.Template
@@ -18,11 +19,12 @@ func init() {
 }
 
 var (
-	template_path        = "templates/index.html"
-	exeeded              = "input exeeded the maximum allowed, try again"
-	max_allowed    int64 = 50000
+	Index_path        = filepath.Join("templates","index.html")
+	Error_path        = filepath.Join("templates","error.html")
+	exeeded           = "input exeeded the maximum allowed, try again"
+	max_allowed int64 = 50000
 	// Data is related to what is shown on the home page
-	Data                 = struct {
+	Data = struct {
 		Ascii string
 		Err   string
 	}{}
@@ -71,7 +73,6 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		ErrorFunc(w, http.StatusMethodNotAllowed)
 	}
-
 	t.Execute(w, Data)
 	Data.Err = ""
 	Data.Ascii = ""
