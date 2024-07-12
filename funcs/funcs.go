@@ -80,6 +80,11 @@ func Home(w http.ResponseWriter, r *http.Request) {
 }
 
 func Ascii_Art(w http.ResponseWriter, r *http.Request) {
+	// this is only for the testing function it is not needed 
+	// for the the server to operate normally.
+	if r.URL.Path != "/ascii-art"{
+		ErrorFunc(w, http.StatusNotFound)
+	}
 	if r.Method != http.MethodPost {
 		ErrorFunc(w, http.StatusMethodNotAllowed)
 		return
@@ -104,5 +109,5 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 		ErrorFunc(w, Input.Status)
 		return
 	}
-	http.Redirect(w, r, "/", 303)
+	http.Redirect(w, r, "/", http.StatusFound)
 }

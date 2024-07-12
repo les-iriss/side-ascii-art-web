@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"strings"
 	funcs "ascii-art-web/funcs"
 )
 
@@ -56,63 +57,64 @@ func TestHome(t *testing.T) {
 	}
 }
 
-func TestAscii_Art(t *testing.T){
-	tests := []struct {
-		name       string
-		urlPath    string
-		method     string
-		body       string
-		wantStatus int
-	}{
-		{
-			name:       "Valid GET request",
-			urlPath:    "/",
-			method:     http.MethodGet,
-			wantStatus: http.StatusOK,
-		},
-		{
-			name:       "Invalid URL path",
-			urlPath:    "/invalid",
-			method:     http.MethodGet,
-			wantStatus: http.StatusNotFound,
-		},
-		{
-			name:       "Invalid method",
-			urlPath:    "/",
-			method:     http.MethodPut,
-			wantStatus: http.StatusMethodNotAllowed,
-		},
-		{
-			name:       "Bad request with invalid form data",
-			urlPath:    "/",
-			method:     http.MethodPost,
-			body:       "text=something&banner=badbanner",
-			wantStatus: http.StatusBadRequest,
-		},
-	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			var req *http.Request
-			if tt.method == http.MethodPost {
-				form := urlPath.Values{}
-				form.Add("text", "something")
-				form.Add("banner", "badbanner")
-				req = httptest.NewRequest(tt.method, tt.urlPath, strings.NewReader(tt.body))
-				req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-			} else {
-				req = httptest.NewRequest(tt.method, tt.urlPath, nil)
-			}
 
-			rr := httptest.NewRecorder()
+func TestAscii_Art(t *testing.T) {
+    tests := []struct {
+        name       string
+        url        string
+        method     string
+        body       string // used for valid request
+        status     int
+    }{
+        {
+            name:       "Valid POST request",
+            url:        "/ascii-art",
+            method:     http.MethodPost,
+            body:       "text=something&banner=standard",
+            status:     http.StatusFound,
+        },
+        {
+            name:       "Invalid URL path",
+            url:        "/ascii-art/invalid",
+            method:     http.MethodPut,
+            status:     http.StatusNotFound,
+        },
+        {
+            name:       "Invalid method",
+            url:        "/ascii-art",
+            method:     http.MethodGet,
+            status:     http.StatusMethodNotAllowed,
+        },
+        {
+            name:       "Bad request",
+            url:        "/ascii-art",
+            method:     http.MethodPost,
+            body:       "invalid_body_format",
+            status:     http.StatusBadRequest,
+        },
+    }
 
-			handler := http.HandlerFunc(Home)
-			handler.ServeHTTP(rr, req)
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            var req *http.Request
+	    // this is for the case of good request , i need to set up the body correctly
+            if tt.status == http.StatusFound {
+                req = httptest.NewRequest(tt.method, tt.url, strings.NewReader(tt.body))
+                req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+            } else {
+                req = httptest.NewRequest(tt.method, tt.url, nil)
+            }
 
-			if status := rr.Code; status != tt.wantStatus {
-				t.Errorf("handler returned wrong status code: got %v want %v",
-					status, tt.wantStatus)
-			}
-		})
-	}
+            rr := httptest.NewRecorder()
+
+            handler := http.HandlerFunc(funcs.Ascii_Art)
+            handler.ServeHTTP(rr, req)
+
+            if status := rr.Code; status != tt.status {
+                t.Errorf("handler returned wrong status code: got %v want %v", status, tt.status)
+            }
+        })
+    }
 }
+
