@@ -4,21 +4,46 @@ import (
 	"html/template"
 	"net/http"
 	fs "ascii-art-web/fs"
-	"path/filepath"
+	"os"
+	"fmt"
 )
 
+var t *template.Template
+
+var err error
+
+func init() {
+    t, err = template.ParseFiles("templates/index.html")
+    if err != nil {
+        panic(err)
+    }
+}
+
+
 var (
-	template_path        = "templates/index.html"
-	not_found            = "404 not found"
-	not_allowed          = "405 Method Not Allowed"
-	internal_error       = "500 Internal Server Error, error check your imput"
-	exeeded              = "413 input exeeded the maximum allowed, try again"
-	max_allowed    int64 = 50000
-	Data 		     = struct{
+	Index_path        = "templates/index.html"
+	Error_path        = "templates/error.html"
+	exeeded           = "input exeeded the maximum allowed, try again"
+	max_allowed int64 = 50000
+	// Data is related to what is shown on the home page
+	Data = struct {
 		Ascii string
+		Err   string
 		Shown bool
-		Err string
 	}{}
+	// Input is related to fs function, that is responsible for generating the ascii
+	// so these variable are eather sent to that func or recieved from it.
+	// the Status and Err are shown on the error page
+	Input = struct {
+		Text   string
+		Banner string
+		Status int
+		Err    error
+	}{
+		Status: 200,
+		Err:    nil,
+	}
+	ToDownload string
 )
 
 /*making a HandleFunc with a multiplexer*/
@@ -36,103 +61,90 @@ func (W *Wrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // making a HandleFunc to wrap functions into handlers
 func HandleFunc(path string, f func(http.ResponseWriter, *http.Request)) {
-	wrapper := Wrapper{}
+	wrapper := &Wrapper{} // instence of Wrapper
 	wrapper.F = f
-	Mux.Handle(path, &wrapper)
+	Mux.Handle(path, wrapper)
 }
 
 /* making functions to hanlde requests */
 func Home(w http.ResponseWriter, r *http.Request) {
-	Data.Err = ""
-	Data.Shown = false
-	Data.Ascii = ""
 	// checking the integrety of the url
 	if r.URL.Path != "/" {
-		w.WriteHeader(404)
-		w.Write([]byte(not_found))
+		ErrorFunc(w, http.StatusNotFound)
 		return
 	}
 
 	if r.Method != http.MethodGet {
-		w.WriteHeader(405)
-		w.Write([]byte(not_allowed))
-		return
-	}
-
-	t, err := template.ParseFiles("templates/index.html")
-	if err != nil {
-		w.WriteHeader(500)
-		// internal server error
-		fmt.Fprintln(w, internal_error)
-		return
+		ErrorFunc(w, http.StatusMethodNotAllowed)
 	}
 	t.Execute(w, Data)
+	ToDownload = Data.Ascii
+	Data.Err = ""
+	Data.Ascii = ""
 }
 
 func Ascii_Art(w http.ResponseWriter, r *http.Request) {
-	Data.Err = ""
-	Data.Ascii = ""
 	Data.Shown = false
+	// this is only for the testing function it is not needed 
+	// for the the server to operate normally.
+	if r.URL.Path != "/ascii-art"{
+		ErrorFunc(w, http.StatusNotFound)
+	}
 	if r.Method != http.MethodPost {
-		w.WriteHeader(405)
-		w.Write([]byte(not_allowed))
+		ErrorFunc(w, http.StatusMethodNotAllowed)
 		return
 	}
 	// checking request length
 	Len := r.ContentLength
 	if Len > max_allowed {
+		w.WriteHeader(http.StatusRequestEntityTooLarge)
 		Data.Err = exeeded
-		w.WriteHeader(413)
-		t, err := template.ParseFiles(template_path)
-		if err != nil {
-			Data.Err = internal_error
-			t.Execute(w, Data)
-		}
+		Data.Ascii = ""
 		t.Execute(w, Data)
+		Data.Err = ""
 		return
 	}
-	t, err := template.ParseFiles("templates/index.html")
-	if err != nil {
-		w.WriteHeader(500)
-		t.Execute(w, internal_error)
-		return
-	}
+
 	// parse the form into a map and get the needed value
 	r.ParseForm()
-	text := r.FormValue("text")
-	banner := r.FormValue("banner")
-	var status int
-	Data.Ascii, status, err = fs.Ascii_Art(text, banner)
-	Data.Shown = true
-	if err != nil {
-		Data.Err = internal_error
-		w.WriteHeader(status)
-		t.Execute(w, Data)
+	Input.Text = r.FormValue("text")
+	Input.Banner = r.FormValue("banner")
+	Data.Ascii, Input.Status, Input.Err = fs.Ascii_Art(Input.Text, Input.Banner)
+	if Input.Err != nil && Input.Status != 200 {
+		ErrorFunc(w, Input.Status)
+		return
 	}
-	t.Execute(w, Data)
+	http.Redirect(w, r, "/", http.StatusFound)
+	Data.Shown = true
 }
 
 func Download(w http.ResponseWriter, r *http.Request){
+	// i have to empty the data after use
+	if r.URL.Path != "/download"{
+		ErrorFunc(w,http.StatusNotFound) 
+		return
+	}
 	if r.Method != http.MethodGet{
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("method not allowed"))
+		ErrorFunc(w, http.StatusMethodNotAllowed)
 		return
 	}
 	referer := r.Header.Get("Referer")
-	if referer != "http://localhost:8080/ascii-art" {
-       	 http.Error(w, "Forbidden", http.StatusForbidden)
-        return
+	if referer != "http://localhost:8080/" {
+		fmt.Println("found error at refere")
+		ErrorFunc(w, http.StatusForbidden)
+        	return
 	}
 	// creat the file first 
 	filename := "ascii-art.txt"
-	err := os.WriteFile(filename, []byte(Data.Ascii), 0644)
+	err := os.WriteFile(filename, []byte(ToDownload), 0644)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	return
+		ErrorFunc(w, http.StatusInternalServerError)
+		return
 	}
 	
 	w.Header().Set("Content-Disposition", "attachment; filename=ascii-art.txt")
      	w.Header().Set("Content-Type", "text/plain")
 	http.ServeFile(w, r ,filename)
 	os.Remove(filename)
+
 }
