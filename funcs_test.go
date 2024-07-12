@@ -156,7 +156,8 @@ func TestDownload(t *testing.T) {
 
 			if tt.status == http.StatusOK {
 				req = httptest.NewRequest(tt.method, tt.url, nil)
-				req.Header.Set("referer", "http://localhost:8080/")
+				req.Header.Set("Referer", "http://localhost:8080/")
+
 			} else {
 				req = httptest.NewRequest(tt.method, tt.url, nil)
 			}
