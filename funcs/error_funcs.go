@@ -2,7 +2,6 @@ package funcs
 
 import "html/template"
 import "net/http"
-import "log"
 
 var Error struct{
 	Title  string 
@@ -14,9 +13,9 @@ var E *template.Template
 
 
 func init() {
-    E, err = template.ParseFiles("templates/index.html")
+    E, err = template.ParseFiles("templates/error.html")
     if err != nil {
-        log.Fatal(err,"\n\tAre you Running the Server from a chiled derectory?")
+        panic(err)
     }
     // Change back to original directory if needed
 }
