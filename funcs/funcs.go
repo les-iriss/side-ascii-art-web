@@ -3,9 +3,18 @@ package funcs
 import (
 	"html/template"
 	"net/http"
-
+	"log"
 	fs "ascii-art-web/fs"
 )
+var t *template.Template
+var err error
+
+func init() {
+    t, err = template.ParseFiles("templates/index.html")
+    if err != nil {
+        log.Fatal(err,"\nare you running the server from a childed derectory?")
+    }
+}
 
 var (
 	template_path        = "templates/index.html"
@@ -62,11 +71,6 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		ErrorFunc(w, http.StatusMethodNotAllowed)
 	}
 
-	t, err := template.ParseFiles("templates/index.html")
-	if err != nil {
-		ErrorFunc(w, http.StatusInternalServerError)
-		return
-	}
 	t.Execute(w, Data)
 	Data.Err = ""
 	Data.Ascii = ""
@@ -81,11 +85,6 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 	Len := r.ContentLength
 	if Len > max_allowed {
 		w.WriteHeader(http.StatusRequestEntityTooLarge)
-		t, err := template.ParseFiles(template_path)
-		if err != nil {
-			ErrorFunc(w, 500)
-			return
-		}
 		Data.Err = exeeded
 		Data.Ascii = ""
 		t.Execute(w, Data)
