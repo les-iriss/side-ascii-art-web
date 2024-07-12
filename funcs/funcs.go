@@ -1,11 +1,10 @@
 package funcs
 
 import (
-	"fmt"
 	"html/template"
 	"net/http"
 	fs "ascii-art-web/fs"
-	"os"
+	"path/filepath"
 )
 
 var (
