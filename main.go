@@ -10,8 +10,14 @@ import (
 /* the main function */
 func main() {
 	// initializing the server
+	// listening at port 0.0.0.0:8080 
+	// so the server can  be accessible from 
+	// any network interface on the machine
+	// where it is running
+	// in contrast to local host where it is accesible only 
+	// from 127.0.0.1 ... 
 	server := http.Server{
-		Addr:    "127.0.0.1:8080",
+		Addr:    "0.0.0.0:8080",
 		Handler: funcs.Mux,
 	}
 	// handle everything at single page
