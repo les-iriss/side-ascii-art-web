@@ -3,6 +3,7 @@ package funcs
 import (
 	"html/template"
 	"net/http"
+
 	fs "ascii-art-web/fs"
 )
 
@@ -11,12 +12,11 @@ var t *template.Template
 var err error
 
 func init() {
-    t, err = template.ParseFiles("templates/index.html")
-    if err != nil {
-        panic(err)
-    }
+	t, err = template.ParseFiles("templates/index.html")
+	if err != nil {
+		panic(err)
+	}
 }
-
 
 var (
 	Index_path        = "templates/index.html"
@@ -79,9 +79,9 @@ func Home(w http.ResponseWriter, r *http.Request) {
 }
 
 func Ascii_Art(w http.ResponseWriter, r *http.Request) {
-	// this is only for the testing function it is not needed 
+	// this is only for the testing function it is not needed
 	// for the the server to operate normally.
-	if r.URL.Path != "/ascii-art"{
+	if r.URL.Path != "/ascii-art" {
 		ErrorFunc(w, http.StatusNotFound)
 	}
 	if r.Method != http.MethodPost {
