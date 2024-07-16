@@ -37,7 +37,7 @@ func Ascii_Art(text, banner string) (string, int, error) {
 	if err != nil {
 		return "", 500, errors.New(internal_server_error)
 	}
-	text = strings.TrimSpace(text)
+	//text = strings.TrimSpace(text)
 	words := strings.Split(text, "\n")
 	// this variable check if there is a newline at the end of the argument
 	return Writer(words, chars_map), 200, nil

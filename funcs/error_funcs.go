@@ -35,7 +35,7 @@ func ErrorFunc(w http.ResponseWriter , Status int){
 		E.Execute(w , Error)
 	case 400 : 
 		w.WriteHeader(400)
-		Error.Title = "Bad Request !!!"
+	    Error.Title = "Bad Request !!!"
 		Error.Status = http.StatusBadRequest
 		Error.Hint = "Bad Request"
 		E.Execute(w , Error)
