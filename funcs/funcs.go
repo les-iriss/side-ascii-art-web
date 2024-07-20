@@ -3,16 +3,14 @@ package funcs
 import (
 	"html/template"
 	"net/http"
-
-	fs "ascii-art-web/fs"
+	fs "my-ascii-art-web/fs"
 )
-
 var t *template.Template
 
 var err error
 
 func init() {
-	t, err = template.ParseFiles("templates/index.html")
+	t, err = template.ParseFiles("templates/index.html") 
 	if err != nil {
 		panic(err)
 	}

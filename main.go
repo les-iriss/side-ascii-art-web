@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	funcs "ascii-art-web/funcs"
+	funcs "my-ascii-art-web/funcs"
 )
 
 /* the main function */
@@ -14,11 +14,16 @@ func main() {
 		Addr:    "127.0.0.1:8080",
 		Handler: funcs.Mux,
 	}
+	//////////////////////////////////
+	//serving the static files.
+    	fileServer := http.FileServer(http.Dir("./static/"))
 
+	funcs.Mux.Handle("/static/",http.StripPrefix("/static",fileServer))
+
+	//////////////////////////////////
 	// handle everything at single page
 	funcs.HandleFunc("/", funcs.Home)
 	funcs.HandleFunc("/ascii-art", funcs.Ascii_Art)
-
 	fmt.Println("server has been launched at localhost:8080")
 	fmt.Println("http://localhost:8080")
 

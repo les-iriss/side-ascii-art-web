@@ -31,7 +31,7 @@ func Ascii_Art(text, banner string) (string, int, error) {
 		return "", 500, errors.New(internal_server_error)
 	}
 
-	path_name := "static/" + banner + ".txt"
+	path_name := "static/banners/" + banner + ".txt"
 	chars_map, err := GetCharacters(chars_indexes, path_name)
 	if err != nil {
 		return "", 500, errors.New(internal_server_error)

@@ -1,3 +1,3 @@
-module ascii-art-web
+module my-ascii-art-web
 
-go 1.21.5
+go 1.21.1
