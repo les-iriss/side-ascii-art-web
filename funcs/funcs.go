@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 	fs "my-ascii-art-web/fs"
+	"strings"
 )
 var t *template.Template
 
@@ -107,4 +108,15 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+func Neuter(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        if strings.HasSuffix(r.URL.Path, "/") {
+            ErrorFunc(w,404 )
+            return
+        }
+
+        next.ServeHTTP(w, r)
+    })
 }
