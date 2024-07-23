@@ -18,7 +18,7 @@ func main() {
 	//serving the static files.
     	fileServer := http.FileServer(http.Dir("./static/"))
 
-	funcs.Mux.Handle("/static/",http.StripPrefix("/static",funcs.Neuter(fileServer)))
+	funcs.Mux.Handle("/static/",http.StripPrefix("/static",funcs.MiddleWare(fileServer)))
 
 	//////////////////////////////////
 	// handle everything at single page

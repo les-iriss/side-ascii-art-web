@@ -109,8 +109,9 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 	}
 	http.Redirect(w, r, "/", http.StatusFound)
 }
-
-func Neuter(next http.Handler) http.Handler {
+// using a middleware
+func MiddleWare(next http.Handler) http.Handler {
+	// the case of examle /something/
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         if strings.HasSuffix(r.URL.Path, "/") {
             ErrorFunc(w,404 )
