@@ -3,14 +3,21 @@ package funcs
 import (
 	"html/template"
 	"net/http"
-	fs "ascii-art-web/fs"
+	fs "my-ascii-art-web/fs"
+	"strings"
 	"os"
-	"fmt"
 )
-
 var t *template.Template
 
 var err error
+
+func init() {
+	t, err = template.ParseFiles("templates/index.html") 
+	if err != nil {
+		panic(err)
+	}
+}
+
 
 func init() {
     t, err = template.ParseFiles("templates/index.html")
@@ -88,6 +95,9 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 	// this is only for the testing function it is not needed 
 	// for the the server to operate normally.
 	if r.URL.Path != "/ascii-art"{
+	// this is only for the testing function it is not needed
+	// for the the server to operate normally.
+	if r.URL.Path != "/ascii-art" {
 		ErrorFunc(w, http.StatusNotFound)
 	}
 	if r.Method != http.MethodPost {
@@ -118,6 +128,8 @@ func Ascii_Art(w http.ResponseWriter, r *http.Request) {
 	Data.Shown = true
 }
 
+}
+
 func Download(w http.ResponseWriter, r *http.Request){
 	// i have to empty the data after use
 	if r.URL.Path != "/download"{
@@ -130,7 +142,6 @@ func Download(w http.ResponseWriter, r *http.Request){
 	}
 	referer := r.Header.Get("Referer")
 	if referer != "http://localhost:8080/" {
-		fmt.Println("found error at refere")
 		ErrorFunc(w, http.StatusForbidden)
         	return
 	}
@@ -147,4 +158,16 @@ func Download(w http.ResponseWriter, r *http.Request){
 	http.ServeFile(w, r ,filename)
 	os.Remove(filename)
 
+}
+// using a middleware
+func MiddleWare(next http.Handler) http.Handler {
+	// the case of examle /something/
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        if strings.HasSuffix(r.URL.Path, "/") {
+            ErrorFunc(w,404 )
+            return
+        }
+
+        next.ServeHTTP(w, r)
+    })
 }

@@ -35,7 +35,7 @@ func ErrorFunc(w http.ResponseWriter , Status int){
 		E.Execute(w , Error)
 	case 400 : 
 		w.WriteHeader(400)
-	    Error.Title = "Bad Request !!!"
+	    	Error.Title = "Bad Request !!!"
 		Error.Status = http.StatusBadRequest
 		Error.Hint = "Bad Request"
 		E.Execute(w , Error)
@@ -44,7 +44,6 @@ func ErrorFunc(w http.ResponseWriter , Status int){
 		Error.Title = "Forbidden !!!"
 		Error.Status = http.StatusForbidden
 		Error.Hint = "the way you access page download is not supported"
-		E.Execute(w, Error)
 	default:
 		w.WriteHeader(Status)
 		Error.Title = "Internal Server Error !!!"

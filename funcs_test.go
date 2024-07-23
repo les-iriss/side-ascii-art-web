@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	funcs "my-ascii-art-web/funcs"
 )
 
 func TestHome(t *testing.T) {

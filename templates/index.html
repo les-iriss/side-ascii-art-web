@@ -2,35 +2,35 @@
 <html lang="en-MA">
 <head>
     <title>ASCII Art Web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
+    <div class="container">
     <h1>Display ASCII Art</h1>
     <form action="/ascii-art" method="post">
-        <fieldset>
-            <legend>ASCII-ART FORM</legend>
-            <label for="text">Enter a Text:</label>
-            <br>
-            <textarea id="text" name="text" rows="4" cols="50" required></textarea>
-            <br>
-            <label for="banner">Banner:</label>
-            <select id="banner" name="banner">
-                <option value="standard">Standard</option>
-                <option value="thinkertoy">Thinkertoy</option>
-                <option value="shadow">Shadow</option>
-            </select>
-	    <br>
-            <button type="submit">Generate</button>
-           {{ if .Shown }}
-          	  <a href="/download" download="ascii-art.txt">Download Result</a>
-           {{ end }}
-	   <br>
-	   <p>{{ .Err }}<p>
-        <fieldset>
-            <legend>RESULT:</legend>
-            <pre>{{ .Ascii }}</pre>
-	    </fieldset>
+	<fieldset id="field1">
+			<legend>ASCII-ART FORM</legend>
+        <br>
+       
+    <textarea name="text" rows="4" cols="50" required></textarea>
+        <br>
+	<!--<label for="banner">Banner:</label>-->
+	<div calss="buttons" >
+        <select id="banner" name="banner">
+            <option value="standard">Standard</option>
+            <option value="thinkertoy">Thinkertoy</option>
+            <option value="shadow">Shadow</option>
+        </select>
+        <button type="submit">Generate</button>
+	</div>
+	<fieldset id="field2">
+	<legend>RESULT:</legend>
+        <pre>{{ .Ascii }}</pre> 
+	</fieldset>
+        <p>{{ .Err }}</p>
         </fieldset>
     </form>
+    </div>
 </body>
 </html>
-

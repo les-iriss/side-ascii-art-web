@@ -3,7 +3,6 @@ package fspackage
 import (
 	"bufio"
 	"errors"
-	"log"
 	"os"
 	"strings"
 )
@@ -32,12 +31,11 @@ func Ascii_Art(text, banner string) (string, int, error) {
 		return "", 500, errors.New(internal_server_error)
 	}
 
-	path_name := "static/" + banner + ".txt"
+	path_name := "static/banners/" + banner + ".txt"
 	chars_map, err := GetCharacters(chars_indexes, path_name)
 	if err != nil {
 		return "", 500, errors.New(internal_server_error)
 	}
-	//text = strings.TrimSpace(text)
 	words := strings.Split(text, "\n")
 	// this variable check if there is a newline at the end of the argument
 	return Writer(words, chars_map), 200, nil
@@ -58,12 +56,15 @@ func getIndexes(text string) (map[int]rune, error) {
 func GetCharacters(index_map map[int]rune, banner string) (map[rune][]string, error) {
 	// Open file,  intialize a bufio scanner along side some variables
 	var (
-		file       = openfile(banner)
-		scanner    = bufio.NewScanner(file)
 		chars_map  = map[rune][]string{}
 		line_num   = 1
 		char_slice = []string{}
 	)
+	file, err := openfile(banner)
+	if err != nil {
+		return nil, err
+	}
+	scanner := bufio.NewScanner(file)
 	defer file.Close()
 
 	for scanner.Scan() {
@@ -131,11 +132,11 @@ func writeChars(slice [][]string) string { // this function print banner text in
 	return "\n" + text
 }
 
-func openfile(banner string) *os.File {
+func openfile(banner string) (*os.File, error) {
 	file, err := os.Open(banner)
 	if err != nil {
 		/* if file has err in open return error message */
-		log.Fatalln("Somthing went wrong please check your input!")
+		return nil, err
 	}
-	return file
+	return file, nil
 }
