@@ -21,7 +21,7 @@ var (
 	Index_path        = "templates/index.html"
 	Error_path        = "templates/error.html"
 	exeeded           = "input exeeded the maximum allowed, try again"
-	max_allowed int64 = 50000
+	max_allowed int64 = 1000
 	// Data is related to what is shown on the home page
 	Data = struct {
 		Ascii string
