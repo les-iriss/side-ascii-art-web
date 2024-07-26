@@ -8,30 +8,31 @@
 <body>
     <div class="container">
     <h1>Display ASCII Art</h1>
-    <form action="/ascii-art" method="post">
         <fieldset id="field1">
-            <legend>ASCII-ART FORM</legend>
+    <form action="/ascii-art" method="post">
             <br>
+			<div>
             <textarea id="text" name="text" rows="4" cols="50" maxlength="1000" required></textarea>
             <br>
+			<div id="bottons">
             <select id="banner" name="banner">
                 <option value="standard">Standard</option>
                 <option value="thinkertoy">Thinkertoy</option>
                 <option value="shadow">Shadow</option>
             </select>
-	    <br>
             <button type="submit">Generate</button>
            {{ if .Shown }}
           	  <a href="/download" download="ascii-art.txt">Download Result</a>
            {{ end }}
-	   <br>
+		   </div>
+	</form>
+	   </div>
 	   <p>{{ .Err }}<p>
         <fieldset id="field2">
             <legend>RESULT:</legend>
             <pre>{{ .Ascii }}</pre>
 	    </fieldset>
         </fieldset>
-    </form>
 </body>
 </html>
 
