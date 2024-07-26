@@ -3,28 +3,29 @@ package funcs
 import (
 	"html/template"
 	"net/http"
-	fs "ascii-art-web/fs"
 	"os"
 	"fmt"
+	fs "my-ascii-art-web/fs"
+	"strings"
 )
-
 var t *template.Template
 
 var err error
 
 func init() {
-    t, err = template.ParseFiles("templates/index.html")
-    if err != nil {
-        panic(err)
-    }
+	t, err = template.ParseFiles("templates/index.html") 
+	if err != nil {
+		panic(err)
+	}
 }
+
 
 
 var (
 	Index_path        = "templates/index.html"
 	Error_path        = "templates/error.html"
 	exeeded           = "input exeeded the maximum allowed, try again"
-	max_allowed int64 = 50000
+	max_allowed int64 = 1000
 	// Data is related to what is shown on the home page
 	Data = struct {
 		Ascii string
@@ -81,6 +82,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	ToDownload = Data.Ascii
 	Data.Err = ""
 	Data.Ascii = ""
+	Data.Shown = false
 }
 
 func Ascii_Art(w http.ResponseWriter, r *http.Request) {
@@ -147,4 +149,16 @@ func Download(w http.ResponseWriter, r *http.Request){
 	http.ServeFile(w, r ,filename)
 	os.Remove(filename)
 
+}
+// using a middleware
+func MiddleWare(next http.Handler) http.Handler {
+	// the case of examle /something/
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        if strings.HasSuffix(r.URL.Path, "/") {
+            ErrorFunc(w,404 )
+            return
+        }
+
+        next.ServeHTTP(w, r)
+    })
 }
